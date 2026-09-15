@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AI Judgment Diagnostic — how calibrated is your trust in AI?</title>
-<meta name="description" content="A 90-second diagnostic testing whether you can spot the 4 ways AI quietly fails in assessment and grading.">
+<meta name="description" content="A 90-second diagnostic on when to trust, verify, or override AI in assessment. Sometimes trusting is the calibrated call.">
 <style>
   :root {
     --bg: #faf9f6;
@@ -68,6 +68,10 @@
     padding: 6px 14px; border-radius: 999px;
     background: var(--accent-bg); color: var(--accent);
   }
+  .direction-note {
+    font-size: 14px; color: var(--text-secondary); text-align: center;
+    margin: -8px 0 24px; padding: 0 6px;
+  }
   .breakdown { display: flex; flex-direction: column; gap: 8px; margin-bottom: 24px; }
   .breakdown-row {
     display: flex; justify-content: space-between; align-items: center;
@@ -78,7 +82,7 @@
   .icon-x { color: var(--danger); font-weight: 700; }
   .cta-box {
     background: var(--card); border: 1px solid var(--border);
-    border-radius: var(--radius); padding: 18px; text-align: center;
+    border-radius: var(--radius); padding: 18px; text-align: left;
     font-size: 14px; color: var(--text-secondary);
   }
   .cta-box strong { color: var(--text); }
@@ -89,7 +93,7 @@
 <div class="container">
   <header>
     <h1>How calibrated is your trust in AI?</h1>
-    <p class="subtitle">4 real failure modes from AI-graded assessment. Trust, verify, or override?</p>
+    <p class="subtitle">5 situations from AI-graded assessment. Trust, verify, or override. Sometimes trusting is the right call.</p>
   </header>
   <div id="app"></div>
   <footer>Built to test judgment, not just usage.</footer>
@@ -99,56 +103,82 @@
 const scenarios = [
   {
     tag: "Inconsistency",
-    prompt: "An AI marker scores two nearly identical student answers to the same question 3 marks apart, with no clear reason why.",
+    mode: "Inconsistency",
+    prompt: "An AI marker gives two nearly identical short answers, submitted minutes apart, scores of 4 out of 7 and 7 out of 7. Same rubric, no feedback explaining the gap.",
     options: [
-      { label: "Trust the scores as given", correct: false },
-      { label: "Verify by re-marking both manually", correct: true },
-      { label: "Override and give both the same score", correct: false }
+      { label: "Trust the scores, the model may have seen something you didn't", type: "trust", correct: false },
+      { label: "Re-mark both against the rubric yourself", type: "verify", correct: true },
+      { label: "Override both to the average", type: "override", correct: false }
     ],
-    reveal: "The tell is the inconsistency itself, not either score alone. Verifying, not guessing which score is right, is the calibrated move."
+    reveal: "You can't tell which score is right from the outputs alone, only that they can't both be. Re-marking is the calibrated move. Averaging just launders the inconsistency into a number you still can't defend."
   },
   {
     tag: "Bias",
-    prompt: "An AI tutor consistently gives more encouraging feedback to answers written in more formal, academic-sounding English.",
+    mode: "Bias",
+    prompt: "Across a batch, the AI tutor's feedback runs warmer and its scores run higher for answers in polished academic English, even when the reasoning is no stronger than plainer-worded answers.",
     options: [
-      { label: "Trust it, tone doesn't affect grading logic", correct: false },
-      { label: "Verify against a rubric-only re-check", correct: true },
-      { label: "Override every score downward", correct: false }
+      { label: "Trust it, tone doesn't change the grading logic", type: "trust", correct: false },
+      { label: "Re-score a blind sample, rubric only, with writing style stripped out", type: "verify", correct: true },
+      { label: "Override every formal-English score downward", type: "override", correct: false }
     ],
-    reveal: "Style-linked feedback patterns are a bias signal. Re-checking against the rubric catches it; blanket-correcting scores does not."
-  },
-  {
-    tag: "Gaming",
-    prompt: "A student's answer scores unusually high after repeating rubric keywords with little real content behind them.",
-    options: [
-      { label: "Trust the score, it matched the rubric", correct: false },
-      { label: "Verify by reading for genuine understanding", correct: true },
-      { label: "Override to the lowest possible score", correct: false }
-    ],
-    reveal: "Keyword-matching without substance is a classic gaming pattern. Verification catches it; trusting or overcorrecting both miss the real issue."
+    reveal: "A style-linked pattern is a bias signal, not proof that any single score is wrong. A blind, rubric-only recheck confirms or clears it. Blanket-correcting just swaps one bias for another."
   },
   {
     tag: "Confidently wrong",
-    prompt: "An AI explains a math error to a student with a fluent, fully confident explanation that is factually incorrect.",
+    mode: "Confidently wrong",
+    prompt: "An AI marks a maths answer correct and explains, fluently and confidently, that 51 is a prime number. You can see that 51 is 3 times 17.",
     options: [
-      { label: "Trust it, the explanation sounds sound", correct: false },
-      { label: "Verify the underlying steps independently", correct: true },
-      { label: "Override and ignore all AI explanations going forward", correct: false }
+      { label: "Trust it, the explanation is clear and confident", type: "trust", correct: false },
+      { label: "Ask for a second opinion before doing anything", type: "verify", correct: false },
+      { label: "Correct the mark and the explanation now", type: "override", correct: true }
     ],
-    reveal: "Fluency is not accuracy. Verifying the actual steps is calibrated; trusting confidence or discarding AI entirely are both overcorrections."
+    reveal: "This one isn't ambiguous, you can see the error. When a mistake is plainly checkable, verifying further is just dithering. The calibrated move is to act. Fluency and confidence are not accuracy."
+  },
+  {
+    tag: "Gaming",
+    mode: "Gaming",
+    prompt: "An essay scores full marks. Reading it, it is a wall of rubric phrases (critical analysis, multiple perspectives, robust evidence) with no actual argument, evidence or reasoning behind them.",
+    options: [
+      { label: "Trust the score, it hit every rubric term", type: "trust", correct: false },
+      { label: "Leave it for now and check other high scorers first", type: "verify", correct: false },
+      { label: "Override the score to reflect the missing content", type: "override", correct: true }
+    ],
+    reveal: "Matching rubric language is not the same as meeting the rubric. You've already read this one and seen it's empty, so it calls for action, not more checking. Spot-checking other high scorers is a good habit, but a separate one."
+  },
+  {
+    tag: "Reliable system",
+    mode: "control",
+    prompt: "Your AI marker was independently checked against expert human marks on 12,000 scripts this term and agreed within one mark 98 percent of the time. On a low-stakes weekly formative quiz, it returns a batch of scores that look right at a glance.",
+    options: [
+      { label: "Accept the scores and spend your time on the high-risk cases", type: "trust", correct: true },
+      { label: "Re-mark the whole batch by hand anyway", type: "verify", correct: false },
+      { label: "Override any score you'd have graded a point differently", type: "override", correct: false }
+    ],
+    reveal: "Calibration runs both ways. On a validated system doing low-stakes work, re-marking everything burns the scarce human attention you need for the cases that actually carry risk. Trusting here is the calibrated call. Over-checking is its own failure mode."
   }
 ];
 
 const actions = {
-  "Inconsistency": "Flag any pair of near-identical inputs that score more than a set number of points apart for manual review.",
-  "Bias": "Run a periodic rubric-only re-check on a sample split by writing style.",
-  "Gaming": "Spot-check a sample of high-scoring AI-graded answers for genuine understanding, not just keyword match.",
-  "Confidently wrong": "Require a second human check on any AI explanation above a confidence threshold before it reaches a student."
+  "Inconsistency": "Flag any pair of near-identical inputs that score more than a set threshold apart for manual review.",
+  "Bias": "Run a periodic rubric-only re-check on a sample, split by writing style.",
+  "Gaming": "Spot-check a sample of high-scoring answers for genuine understanding, not just keyword match.",
+  "Confidently wrong": "Require a second human check on any AI explanation above a confidence threshold before it reaches a student.",
+  "control": "Calibration cuts both ways. Don't spend scarce human review on a validated system doing low-stakes work, save it for the high-risk cases."
 };
 
 let current = 0;
 let score = 0;
-let answers = [];
+let answers = [];      // was the choice correct
+let chosenTypes = [];  // trust / verify / override
+
+function shuffle(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
 
 function render() {
   const app = document.getElementById('app');
@@ -162,10 +192,10 @@ function render() {
       <div id="feedback"></div>
     `;
     const optsDiv = document.getElementById('opts');
-    s.options.forEach((o, i) => {
+    shuffle(s.options).forEach((o) => {
       const btn = document.createElement('button');
       btn.textContent = o.label;
-      btn.onclick = () => choose(i);
+      btn.onclick = () => choose(o);
       optsDiv.appendChild(btn);
     });
   } else {
@@ -173,11 +203,11 @@ function render() {
   }
 }
 
-function choose(i) {
-  const s = scenarios[current];
-  const opt = s.options[i];
+function choose(opt) {
   answers.push(opt.correct);
+  chosenTypes.push(opt.type);
   if (opt.correct) score++;
+  const s = scenarios[current];
   document.getElementById('opts').querySelectorAll('button').forEach(b => b.disabled = true);
   document.getElementById('feedback').innerHTML = `
     <div class="feedback-card ${opt.correct ? 'correct' : 'incorrect'}">
@@ -189,20 +219,39 @@ function choose(i) {
   document.getElementById('next').onclick = () => { current++; render(); };
 }
 
+function directionNote() {
+  const misses = answers.filter(a => !a).length;
+  if (misses === 0) return "";
+  // over-trust: chose "trust" when it was wrong
+  const overTrust = scenarios.filter((s, i) => chosenTypes[i] === "trust" && !answers[i]).length;
+  // over-caution: the calibrated answer was "trust" but they didn't take it
+  const overCaution = scenarios.filter((s, i) => {
+    const correctOpt = s.options.find(o => o.correct);
+    return correctOpt.type === "trust" && !answers[i];
+  }).length;
+  if (overTrust > 0 && overCaution === 0) return "Your misses lean one way: trusting AI more readily than the situation warranted.";
+  if (overCaution > 0 && overTrust === 0) return "Your misses lean the other way: checking or overriding output that was already reliable.";
+  if (overTrust > 0 && overCaution > 0) return "Your misses run in both directions, sometimes trusting too much, sometimes checking what didn't need it.";
+  return "Your read on when to trust was sound. The misses were about timing: checking when you could already act, or acting when you still needed to check.";
+}
+
 function showResult() {
   const app = document.getElementById('app');
+  const total = scenarios.length;
   let tag = "Calibrated";
-  if (score <= 1) tag = "Under-verifying";
-  else if (score <= 3) tag = "Building calibration";
+  if (score <= 2) tag = "Miscalibrated";
+  else if (score <= total - 1) tag = "Building calibration";
 
   const missed = scenarios.filter((s, i) => !answers[i]);
+  const note = directionNote();
 
   app.innerHTML = `
     <div class="result-score">
       <div style="font-size:13px;color:var(--text-secondary);">Your score</div>
-      <div class="num">${score} / ${scenarios.length}</div>
+      <div class="num">${score} / ${total}</div>
       <div class="result-tag">${tag}</div>
     </div>
+    ${note ? `<div class="direction-note">${note}</div>` : ``}
     <div class="breakdown">
       ${scenarios.map((s, i) => `
         <div class="breakdown-row">
@@ -213,11 +262,11 @@ function showResult() {
     </div>
     ${missed.length > 0 ? `
       <div class="cta-box">
-        <strong>What to do about it:</strong><br><br>
-        ${missed.map(s => `${s.tag}: ${actions[s.tag]}`).join('<br><br>')}
+        <strong>What to do about the ones you missed:</strong><br><br>
+        ${missed.map(s => `${s.tag}: ${actions[s.mode]}`).join('<br><br>')}
       </div>
     ` : `
-      <div class="cta-box"><strong>Strong calibration.</strong> You caught every failure mode in this set.</div>
+      <div class="cta-box"><strong>Strong calibration.</strong> You matched your response to the situation every time, including knowing when to leave a reliable system alone.</div>
     `}
   `;
 }
