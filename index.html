@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AI Judgment Diagnostic — how calibrated is your trust in AI?</title>
-<meta name="description" content="A 90-second diagnostic on when to trust, verify, or override AI in assessment. Sometimes trusting is the calibrated call.">
+<title>AI Judgment Diagnostic: how calibrated is your trust in AI?</title>
+<meta name="description" content="A 90-second diagnostic on when to trust, check, or escalate AI in assessment. Sometimes trusting is the calibrated call.">
 <style>
   :root {
     --bg: #faf9f6;
@@ -93,7 +93,7 @@
 <div class="container">
   <header>
     <h1>How calibrated is your trust in AI?</h1>
-    <p class="subtitle">5 situations from AI-graded assessment. Trust, verify, or override. Sometimes trusting is the right call.</p>
+    <p class="subtitle">5 situations from AI-graded assessment. Trust it, check it, or escalate it. Sometimes trusting is the right call.</p>
   </header>
   <div id="app"></div>
   <footer>Built to test judgment, not just usage.</footer>
@@ -106,55 +106,55 @@ const scenarios = [
     mode: "Inconsistency",
     prompt: "An AI marker gives two nearly identical short answers, submitted minutes apart, scores of 4 out of 7 and 7 out of 7. Same rubric, no feedback explaining the gap.",
     options: [
-      { label: "Trust the scores, the model may have seen something you didn't", type: "trust", correct: false },
-      { label: "Re-mark both against the rubric yourself", type: "verify", correct: true },
-      { label: "Override both to the average", type: "override", correct: false }
+      { label: "Trust the scores, the model may have seen something you didn't", isTrust: true, correct: false },
+      { label: "Re-mark both against the rubric yourself", isTrust: false, correct: true },
+      { label: "Send both to a second marker without looking first", isTrust: false, correct: false }
     ],
-    reveal: "You can't tell which score is right from the outputs alone, only that they can't both be. Re-marking is the calibrated move. Averaging just launders the inconsistency into a number you still can't defend."
+    reveal: "You can't tell which score is right from the outputs alone, only that they can't both be. This is squarely checkable by you, so re-marking is the calibrated move. Passing it on unread just adds delay to something you could resolve."
   },
   {
     tag: "Bias",
     mode: "Bias",
     prompt: "Across a batch, the AI tutor's feedback runs warmer and its scores run higher for answers in polished academic English, even when the reasoning is no stronger than plainer-worded answers.",
     options: [
-      { label: "Trust it, tone doesn't change the grading logic", type: "trust", correct: false },
-      { label: "Re-score a blind sample, rubric only, with writing style stripped out", type: "verify", correct: true },
-      { label: "Override every formal-English score downward", type: "override", correct: false }
+      { label: "Trust it, tone doesn't change the grading logic", isTrust: true, correct: false },
+      { label: "Re-mark this one student's script yourself", isTrust: false, correct: false },
+      { label: "Flag the pattern for a rubric-only audit across the batch", isTrust: false, correct: true }
     ],
-    reveal: "A style-linked pattern is a bias signal, not proof that any single score is wrong. A blind, rubric-only recheck confirms or clears it. Blanket-correcting just swaps one bias for another."
+    reveal: "A style-linked pattern across many scripts isn't settled by re-marking one. It's a systemic signal, so the calibrated response is a blind, rubric-only audit across the batch, not a one-off fix that leaves the pattern in place."
   },
   {
     tag: "Confidently wrong",
     mode: "Confidently wrong",
     prompt: "An AI marks a maths answer correct and explains, fluently and confidently, that 51 is a prime number. You can see that 51 is 3 times 17.",
     options: [
-      { label: "Trust it, the explanation is clear and confident", type: "trust", correct: false },
-      { label: "Ask for a second opinion before doing anything", type: "verify", correct: false },
-      { label: "Correct the mark and the explanation now", type: "override", correct: true }
+      { label: "Trust it, the explanation is clear and confident", isTrust: true, correct: false },
+      { label: "Check it and correct the mark yourself", isTrust: false, correct: true },
+      { label: "Run it back through the AI for a cleaner explanation", isTrust: false, correct: false }
     ],
-    reveal: "This one isn't ambiguous, you can see the error. When a mistake is plainly checkable, verifying further is just dithering. The calibrated move is to act. Fluency and confidence are not accuracy."
+    reveal: "You can see the error, so checking and correcting it yourself is quick and calibrated. Running it back through the AI tends to reproduce a confident mistake rather than fix it. Fluency is not accuracy."
   },
   {
     tag: "Gaming",
     mode: "Gaming",
-    prompt: "An essay scores full marks. Reading it, it is a wall of rubric phrases (critical analysis, multiple perspectives, robust evidence) with no actual argument, evidence or reasoning behind them.",
+    prompt: "A graded essay scores full marks. Reading it, it is a wall of rubric phrases (critical analysis, multiple perspectives, robust evidence) with no actual argument, evidence or reasoning behind them.",
     options: [
-      { label: "Trust the score, it hit every rubric term", type: "trust", correct: false },
-      { label: "Leave it for now and check other high scorers first", type: "verify", correct: false },
-      { label: "Override the score to reflect the missing content", type: "override", correct: true }
+      { label: "Trust the score, it hit every rubric term", isTrust: true, correct: false },
+      { label: "Quietly lower the score yourself", isTrust: false, correct: false },
+      { label: "Flag it for moderation with a second marker", isTrust: false, correct: true }
     ],
-    reveal: "Matching rubric language is not the same as meeting the rubric. You've already read this one and seen it's empty, so it calls for action, not more checking. Spot-checking other high scorers is a good habit, but a separate one."
+    reveal: "You had to read it to know it was empty, which is the point, you can't correct what you haven't checked. But silently changing a top mark on a graded piece invites disputes, and a rubric this gameable is a systemic problem. Flagging for moderation fixes this score and surfaces the wider gap."
   },
   {
     tag: "Reliable system",
     mode: "control",
     prompt: "Your AI marker was independently checked against expert human marks on 12,000 scripts this term and agreed within one mark 98 percent of the time. On a low-stakes weekly formative quiz, it returns a batch of scores that look right at a glance.",
     options: [
-      { label: "Accept the scores and spend your time on the high-risk cases", type: "trust", correct: true },
-      { label: "Re-mark the whole batch by hand anyway", type: "verify", correct: false },
-      { label: "Override any score you'd have graded a point differently", type: "override", correct: false }
+      { label: "Accept the scores and spend your time on the high-risk cases", isTrust: true, correct: true },
+      { label: "Re-mark the whole batch by hand anyway", isTrust: false, correct: false },
+      { label: "Send the whole batch for a second human pass", isTrust: false, correct: false }
     ],
-    reveal: "Calibration runs both ways. On a validated system doing low-stakes work, re-marking everything burns the scarce human attention you need for the cases that actually carry risk. Trusting here is the calibrated call. Over-checking is its own failure mode."
+    reveal: "Calibration runs both ways. On a validated system doing low-stakes work, re-checking everything burns the scarce human attention you need for the cases that actually carry risk. Trusting here is the calibrated call. Over-checking is its own failure mode."
   }
 ];
 
@@ -168,8 +168,8 @@ const actions = {
 
 let current = 0;
 let score = 0;
-let answers = [];      // was the choice correct
-let chosenTypes = [];  // trust / verify / override
+let answers = [];       // was the choice correct
+let chosenTrust = [];   // did the choice mean "trust it as-is"
 
 function shuffle(arr) {
   const a = arr.slice();
@@ -205,7 +205,7 @@ function render() {
 
 function choose(opt) {
   answers.push(opt.correct);
-  chosenTypes.push(opt.type);
+  chosenTrust.push(!!opt.isTrust);
   if (opt.correct) score++;
   const s = scenarios[current];
   document.getElementById('opts').querySelectorAll('button').forEach(b => b.disabled = true);
@@ -222,17 +222,17 @@ function choose(opt) {
 function directionNote() {
   const misses = answers.filter(a => !a).length;
   if (misses === 0) return "";
-  // over-trust: chose "trust" when it was wrong
-  const overTrust = scenarios.filter((s, i) => chosenTypes[i] === "trust" && !answers[i]).length;
-  // over-caution: the calibrated answer was "trust" but they didn't take it
+  // over-trust: chose "trust it as-is" when that was wrong
+  const overTrust = scenarios.filter((s, i) => chosenTrust[i] && !answers[i]).length;
+  // over-caution: the calibrated answer was to trust, but they didn't take it
   const overCaution = scenarios.filter((s, i) => {
     const correctOpt = s.options.find(o => o.correct);
-    return correctOpt.type === "trust" && !answers[i];
+    return correctOpt.isTrust && !answers[i];
   }).length;
   if (overTrust > 0 && overCaution === 0) return "Your misses lean one way: trusting AI more readily than the situation warranted.";
-  if (overCaution > 0 && overTrust === 0) return "Your misses lean the other way: checking or overriding output that was already reliable.";
+  if (overCaution > 0 && overTrust === 0) return "Your misses lean the other way: checking or escalating output that was already reliable.";
   if (overTrust > 0 && overCaution > 0) return "Your misses run in both directions, sometimes trusting too much, sometimes checking what didn't need it.";
-  return "Your read on when to trust was sound. The misses were about timing: checking when you could already act, or acting when you still needed to check.";
+  return "Your read on when to trust was sound. The misses were about routing: checking a case yourself that was better escalated, or escalating one you could have resolved.";
 }
 
 function showResult() {
