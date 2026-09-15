@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Judgment Diagnostic — how calibrated is your trust in AI?</title>
+<meta name="description" content="A 90-second diagnostic testing whether you can spot the 4 ways AI quietly fails in assessment and grading.">
+<style>
+  :root {
+    --bg: #faf9f6;
+    --card: #ffffff;
+    --border: #e5e2da;
+    --text: #1a1a18;
+    --text-secondary: #6b6a63;
+    --accent: #185fa5;
+    --accent-bg: #e6f1fb;
+    --success: #3b6d11;
+    --success-bg: #eaf3de;
+    --danger: #a32d2d;
+    --danger-bg: #fcebeb;
+    --warning: #854f0b;
+    --warning-bg: #faeeda;
+    --radius: 10px;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    margin: 0;
+    padding: 24px 16px 64px;
+    line-height: 1.6;
+  }
+  .container { max-width: 480px; margin: 0 auto; }
+  header { text-align: center; margin-bottom: 32px; }
+  h1 { font-size: 22px; font-weight: 600; margin: 0 0 8px; }
+  .subtitle { color: var(--text-secondary); font-size: 15px; margin: 0; }
+  .progress { font-size: 13px; color: var(--text-secondary); margin-bottom: 8px; }
+  .tag-label {
+    display: inline-block; font-size: 12px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.03em;
+    color: var(--accent); background: var(--accent-bg);
+    padding: 3px 10px; border-radius: 999px; margin-bottom: 12px;
+  }
+  .prompt { font-size: 17px; line-height: 1.7; margin: 0 0 20px; }
+  .options { display: flex; flex-direction: column; gap: 10px; }
+  button {
+    font-family: inherit; font-size: 15px; text-align: left;
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 14px 16px; cursor: pointer;
+    color: var(--text); transition: border-color 0.15s ease, background 0.15s ease;
+  }
+  button:hover:not(:disabled) { border-color: var(--accent); background: var(--accent-bg); }
+  button:disabled { cursor: default; opacity: 0.55; }
+  .feedback-card { border-radius: var(--radius); padding: 16px; margin: 16px 0; }
+  .feedback-card.correct { background: var(--success-bg); }
+  .feedback-card.incorrect { background: var(--danger-bg); }
+  .feedback-label { font-size: 13px; font-weight: 600; margin-bottom: 6px; }
+  .feedback-label.correct { color: var(--success); }
+  .feedback-label.incorrect { color: var(--danger); }
+  .feedback-text { font-size: 14px; color: var(--text-secondary); }
+  .next-btn { background: var(--text); color: #fff; border: none; text-align: center; font-weight: 600; width: 100%; }
+  .next-btn:hover { opacity: 0.9; background: var(--text); }
+  .result-score { text-align: center; padding: 8px 0 24px; }
+  .result-score .num { font-size: 40px; font-weight: 700; margin: 4px 0 12px; }
+  .result-tag {
+    display: inline-block; font-size: 13px; font-weight: 600;
+    padding: 6px 14px; border-radius: 999px;
+    background: var(--accent-bg); color: var(--accent);
+  }
+  .breakdown { display: flex; flex-direction: column; gap: 8px; margin-bottom: 24px; }
+  .breakdown-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 10px 14px; background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius); font-size: 14px;
+  }
+  .icon-check { color: var(--success); font-weight: 700; }
+  .icon-x { color: var(--danger); font-weight: 700; }
+  .cta-box {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 18px; text-align: center;
+    font-size: 14px; color: var(--text-secondary);
+  }
+  .cta-box strong { color: var(--text); }
+  footer { text-align: center; font-size: 12px; color: var(--text-secondary); margin-top: 40px; }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>How calibrated is your trust in AI?</h1>
+    <p class="subtitle">4 real failure modes from AI-graded assessment. Trust, verify, or override?</p>
+  </header>
+  <div id="app"></div>
+  <footer>Built to test judgment, not just usage.</footer>
+</div>
+
+<script>
+const scenarios = [
+  {
+    tag: "Inconsistency",
+    prompt: "An AI marker scores two nearly identical student answers to the same question 3 marks apart, with no clear reason why.",
+    options: [
+      { label: "Trust the scores as given", correct: false },
+      { label: "Verify by re-marking both manually", correct: true },
+      { label: "Override and give both the same score", correct: false }
+    ],
+    reveal: "The tell is the inconsistency itself, not either score alone. Verifying, not guessing which score is right, is the calibrated move."
+  },
+  {
+    tag: "Bias",
+    prompt: "An AI tutor consistently gives more encouraging feedback to answers written in more formal, academic-sounding English.",
+    options: [
+      { label: "Trust it, tone doesn't affect grading logic", correct: false },
+      { label: "Verify against a rubric-only re-check", correct: true },
+      { label: "Override every score downward", correct: false }
+    ],
+    reveal: "Style-linked feedback patterns are a bias signal. Re-checking against the rubric catches it; blanket-correcting scores does not."
+  },
+  {
+    tag: "Gaming",
+    prompt: "A student's answer scores unusually high after repeating rubric keywords with little real content behind them.",
+    options: [
+      { label: "Trust the score, it matched the rubric", correct: false },
+      { label: "Verify by reading for genuine understanding", correct: true },
+      { label: "Override to the lowest possible score", correct: false }
+    ],
+    reveal: "Keyword-matching without substance is a classic gaming pattern. Verification catches it; trusting or overcorrecting both miss the real issue."
+  },
+  {
+    tag: "Confidently wrong",
+    prompt: "An AI explains a math error to a student with a fluent, fully confident explanation that is factually incorrect.",
+    options: [
+      { label: "Trust it, the explanation sounds sound", correct: false },
+      { label: "Verify the underlying steps independently", correct: true },
+      { label: "Override and ignore all AI explanations going forward", correct: false }
+    ],
+    reveal: "Fluency is not accuracy. Verifying the actual steps is calibrated; trusting confidence or discarding AI entirely are both overcorrections."
+  }
+];
+
+const actions = {
+  "Inconsistency": "Flag any pair of near-identical inputs that score more than a set number of points apart for manual review.",
+  "Bias": "Run a periodic rubric-only re-check on a sample split by writing style.",
+  "Gaming": "Spot-check a sample of high-scoring AI-graded answers for genuine understanding, not just keyword match.",
+  "Confidently wrong": "Require a second human check on any AI explanation above a confidence threshold before it reaches a student."
+};
+
+let current = 0;
+let score = 0;
+let answers = [];
+
+function render() {
+  const app = document.getElementById('app');
+  if (current < scenarios.length) {
+    const s = scenarios[current];
+    app.innerHTML = `
+      <div class="progress">Scenario ${current + 1} of ${scenarios.length}</div>
+      <div class="tag-label">${s.tag}</div>
+      <p class="prompt">${s.prompt}</p>
+      <div class="options" id="opts"></div>
+      <div id="feedback"></div>
+    `;
+    const optsDiv = document.getElementById('opts');
+    s.options.forEach((o, i) => {
+      const btn = document.createElement('button');
+      btn.textContent = o.label;
+      btn.onclick = () => choose(i);
+      optsDiv.appendChild(btn);
+    });
+  } else {
+    showResult();
+  }
+}
+
+function choose(i) {
+  const s = scenarios[current];
+  const opt = s.options[i];
+  answers.push(opt.correct);
+  if (opt.correct) score++;
+  document.getElementById('opts').querySelectorAll('button').forEach(b => b.disabled = true);
+  document.getElementById('feedback').innerHTML = `
+    <div class="feedback-card ${opt.correct ? 'correct' : 'incorrect'}">
+      <div class="feedback-label ${opt.correct ? 'correct' : 'incorrect'}">${opt.correct ? 'Calibrated' : 'Not calibrated'}</div>
+      <div class="feedback-text">${s.reveal}</div>
+    </div>
+    <button class="next-btn" id="next">${current === scenarios.length - 1 ? 'See result' : 'Next scenario'}</button>
+  `;
+  document.getElementById('next').onclick = () => { current++; render(); };
+}
+
+function showResult() {
+  const app = document.getElementById('app');
+  let tag = "Calibrated";
+  if (score <= 1) tag = "Under-verifying";
+  else if (score <= 3) tag = "Building calibration";
+
+  const missed = scenarios.filter((s, i) => !answers[i]);
+
+  app.innerHTML = `
+    <div class="result-score">
+      <div style="font-size:13px;color:var(--text-secondary);">Your score</div>
+      <div class="num">${score} / ${scenarios.length}</div>
+      <div class="result-tag">${tag}</div>
+    </div>
+    <div class="breakdown">
+      ${scenarios.map((s, i) => `
+        <div class="breakdown-row">
+          <span>${s.tag}</span>
+          <span class="${answers[i] ? 'icon-check' : 'icon-x'}">${answers[i] ? '✓' : '✗'}</span>
+        </div>
+      `).join('')}
+    </div>
+    ${missed.length > 0 ? `
+      <div class="cta-box">
+        <strong>What to do about it:</strong><br><br>
+        ${missed.map(s => `${s.tag}: ${actions[s.tag]}`).join('<br><br>')}
+      </div>
+    ` : `
+      <div class="cta-box"><strong>Strong calibration.</strong> You caught every failure mode in this set.</div>
+    `}
+  `;
+}
+
+render();
+</script>
+</body>
+</html>
